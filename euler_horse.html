@@ -1,0 +1,215 @@
+<html>
+
+<head>
+	<title>Euler Horse</title>
+	<author>Martin Schnurer</author>
+
+	<style>
+		td{
+			border:1px solid black;
+		}
+
+		input[type='number']{
+			width:50px;
+		}
+
+	</style>
+
+</head>
+
+<body>
+
+	<p><b>Knight's Tour</b></p>
+	<p>Vlozte velkost sachovnice : <input type='number' value=8 id='dimension'></p>
+	<p>Pomalsia simulacia: <input type="checkbox" id='simulation'></p>
+	<p>Start position: x:<input type='number'value=0  id='xstart'><input type="number" value=0 id='ystart'>
+
+	<table id="sachovnica" style='border:1px solid black;'>
+	</table>
+	<button onclick='simulation();'>Spust simulaciu</button>
+
+	
+	<script>
+		var dimension = 0;
+		var simulation_on = 0;
+
+		function createArray()
+		{
+			//vytvori pole s rozmermi dimension a vsade podosadza nuly -> to znamena ze kon este nebol nikde
+			var arr = [];
+			var riadok = [];
+			for(a = 0;a<dimension;a++)	
+				{
+					riadok = [] 
+					for(var b=0;b<dimension;b++)
+						riadok.push(0);
+					arr.push(riadok);
+				}
+			return arr;
+		}
+
+		function setStartPosition(arr,x,y)
+		{
+			if(x < 0 || x > arr[0].length || y < 0 || y > arr[0].length)
+				{
+					window.alert('Nastavili ste poziciu mimo sachovnice !');
+					return -1;
+				}
+			
+			arr[x][y] = 1;
+
+		}
+
+		function isValid(x,y)
+		{
+			var ok = 0;
+			
+			if(x >= 0 && x < dimension)
+				ok++;
+			if(y >= 0 && y < dimension)
+				ok++;
+
+			if(ok == 2)
+				return 1;
+			return 0;
+		}
+
+
+		function drawTable(arr)
+		{
+			var t = document.getElementById('sachovnica');
+			t.innerHTML = "";
+
+			for(a=0;a<dimension;a++)
+			{
+				var row = "";
+				for(b=0;b<dimension;b++)
+				{
+					row += "<td>"+arr[a][b];
+				}
+				t.innerHTML += "<tr>"+row;
+			}
+		}
+
+
+		function getNextValidFreePositions(arr,x,y)
+		{
+			var suradnice = [];
+			if( isValid(x-2,y-1) 	&& arr[x-2][y-1]== 0)
+				suradnice.push([x-2,y-1]);
+			if(isValid(x+2,y-1) 	&& arr[x+2][y-1] == 0 )
+				suradnice.push([x+2,y-1]);
+			if(isValid(x-2,y+1) 	&& arr[x-2][y+1] == 0 )
+				suradnice.push([x-2,y+1]);
+			if(isValid(x+2,y+1) 	&& arr[x+2][y+1] == 0 )
+				suradnice.push([x+2,y+1]);
+			if(isValid(x-1,y-2)		&& arr[x-1][y-2] == 0 )
+				suradnice.push([x-1,y-2]);
+			if(isValid(x-1,y+2)		&& arr[x-1][y+2] == 0 )
+				suradnice.push([x-1,y+2]);
+			if(isValid(x+1,y-2)		&& arr[x+1][y-2] == 0 )
+				suradnice.push([x+1,y-2]);
+			if(isValid(x+1,y+2)		&& arr[x+1][y+2] == 0 )
+				suradnice.push([x+1,y+2]);
+		
+			return suradnice;
+		}
+
+		function findNextPosition(arr,x,y,id)
+		// DO ARGUMENTOV VSTUPUJE MOMENTALNA POZICIA KONA
+		{
+			iteration++;
+
+			if(iteration > 40000000)
+				return;
+
+				arr[x][y] = id;
+
+			if(id == dimension*dimension ) 
+				{
+					console.log("JUPIII");
+					return 1;
+				}
+
+			//console.log("find");
+
+			var toTry = getNextValidFreePositions(arr,x,y);
+			
+			var finded = 0;
+
+			//PRE KAZDU MOZNU POZICIU
+			while(toTry.length)
+			{
+				var Try = toTry.shift();
+				if(findNextPosition(arr,Try[0],Try[1],id+1))
+					{
+						finded = 1;
+						break;
+					}
+			}
+
+			//AK CEZ SVOJU POZICIU NENAJDEM NIKOHO, TAK TREBA PO SEBE UPRATAT
+			if(! finded)
+				arr[x][y] = 0;
+
+			return finded;
+		}
+
+		function vypis(array)
+		{
+			for(a=0;a<array.length;a++)
+				{
+					var str = "";
+					for(b=0;b<array[a].length;b++)
+						str += array[a][b]+"\t";
+					
+					console.log(str);
+
+				}	
+		}
+
+
+		function INIT()
+		{
+			sachovnica = createArray(dimension);
+			findNextPosition(sachovnica,0,0,1);
+			vypis(sachovnica);
+			console.log('prebehli '+iteration+ ' iteracii');	
+			drawTable(sachovnica);
+		}
+
+
+		function simulation()
+		{
+			/*GLOBALNA PREMENNA*/
+				dimension = document.getElementById('dimension').value;
+			/*********************/
+			var xstart = parseInt(document.getElementById('xstart').value);
+			var ystart = parseInt(document.getElementById('ystart').value);
+			var sim = document.getElementById('simulation').value;
+
+			if(sim == "on")
+				simulation_on = 1;
+
+			var sachovnica = createArray(parseInt(dimension));
+			findNextPosition(sachovnica,ystart,xstart,1);
+
+			console.log(simulation);
+			console.log(iteration);
+
+			drawTable(sachovnica);
+
+		}
+
+		var iteration = 0;
+		
+
+
+
+
+	</script>
+
+
+</body>
+
+</html>
